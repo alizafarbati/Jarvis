@@ -18,6 +18,16 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v7
 
+      - name: Install system audio libs (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends portaudio19-dev libespeak1 libasound2-dev
+
+      - name: Install system audio libs (macOS)
+        if: runner.os == 'macOS'
+        run: brew install portaudio espeak
+
       - name: Setup Python
         if: ${{ hashFiles('**/requirements*.txt', '**/pyproject.toml', '**/setup.py') != '' }}
         uses: actions/setup-python@v7

@@ -94,14 +94,26 @@ class TTS:
 
 
 class VoiceRecognizer:
-    """Speech recognition for voice commands."""
+    """Speech recognition for voice commands.
+
+    Gracefully degrades when PyAudio / a microphone is unavailable
+    (headless servers, CI runners): recognition is disabled and
+    `listen_once` returns None instead of crashing.
+    """
 
     def __init__(self, wake_word: Optional[str] = None):
         self.recognizer = sr.Recognizer()
-        self.microphone = sr.Microphone()
+        self.microphone = None
+        self.available = False
         self.wake_word = wake_word or config.wake_word
         self.listening = False
         self.callback: Optional[Callable[[str], None]] = None
+
+        try:
+            self.microphone = sr.Microphone()
+        except Exception as e:
+            console.print(f"[yellow]Microphone unavailable ({e}); voice input disabled.[/yellow]")
+            return
 
         # Calibrate for ambient noise
         with self.microphone as source:
@@ -109,12 +121,16 @@ class VoiceRecognizer:
             self.recognizer.adjust_for_ambient_noise(source, duration=2)
             console.print("[green]Calibration complete.[/green]")
 
+        self.available = True
+
         # Recognition settings
         self.recognizer.dynamic_energy_threshold = True
         self.recognizer.pause_threshold = 0.8
 
     def listen_once(self, timeout: Optional[float] = None) -> Optional[str]:
         """Listen for a single command."""
+        if not self.available or self.microphone is None:
+            return None
         try:
             with self.microphone as source:
                 console.print("[dim]Listening...[/dim]")

@@ -1,6 +1,6 @@
-ollama>=0.1.7
+ollama>=0.6.2
 pyttsx3>=2.90
-SpeechRecognition>=3.10.0
+SpeechRecognition>=3.17.0
 PyAudio>=0.2.13
 pyperclip>=1.8.2
 psutil>=5.9.0
@@ -13,4 +13,4 @@ keyboard>=0.13.5
 pyautogui>=0.9.54
 plyer>=2.1.0
 chromadb>=0.4.0
-numpy>=1.24.0
+numpy>=2.2.6
